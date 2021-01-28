@@ -1,0 +1,39 @@
+0. Revision.
+One way of thinking about most digital systems(practically which are mostly synchronous) is that
+the registers stores the logic value between clock cycles, while the combinational part is
+re-evaluating them in bw and the new values are sampled at clock edges.
+D-FF : After the 0->1 transistion of the clock, q becomes d ie, q takes on the value of d present
+just before the transistion, q changes after the clock edge is complete.
+Another phrasing : After each rising edge of the clock, q takes on the value that was present at d
+before that clock edge.
+
+N statges of register implies n statge of logic ie take n clock cycle for the input to finally reach
+the output after evaluation.If feed back needed, should be takem from the output of registers not
+from combinational part as may not be stable during clock edges ie combinational logic feedback does
+not work in synchronous designs, must feedback through register.
+
+Digital systems are built as collections of registers with combinational logic bw them. All the
+registers sample their inputs at the same time at rising edge of the clock, and b4 the next rising
+edge of the clock, all the combinational logic evaluates what appears at those Q outputs to
+present it to D inputs for the next clock edge. combinational logic cant store data, thats why
+sequential needed and clock to synchronise. This ishow you design registers as in you should think
+about the data states that needs to be saved bw clock cycles.
+
+There should be a global reset to init the registers to known value.
+
+#TIP:make timing diagram b4 and then check with the simulation tool.
+
+Dont rely on combinational logic for delay path as they are affected by temp, process variation(4-1 ratio)
+etc. Not ideal.
+
+Sample Design Problem:
+Think what needs to be saved bw clock cycles and put them in registers and then determine the
+inputs and combinational logic needed. 
+https://youtu.be/fgsvjew2DGg?t=1388
+
+Basic principal of operation:
+1.On rising edge of clock, register outputs take on value of register inputs.
+2.In bw the rising edges of the clock, the combinational logic paths evaluate to present next set of
+inputs to those registers. Feedbacks com from output of a latter register.
+Understand that this happens all over the chip as the clock is distributed all over the chip and
+hence massive parallel capabilites arise.
