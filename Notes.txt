@@ -54,4 +54,97 @@ triggered latch with small triangle at clk input.
 3.Computer Arithematic>
 ToDo: fill this
 
-Introduction 1.
+1.Introduction to ASIC Design
+Most ASIC ,fpga and gate arrays use rtl/synthesis based methodology. design details are captured in
+simulatable description of hardware at RTL ie all the registers are identified and named and is
+simulated extensively toverify functional correctness.
+Automatic synthesis is used to turn this RTL into a gate-level description that is net-list which
+again is verified for correctness. net-list implies the connections.
+
+Timing 1a.
+Events are synchronized using a master clock using flip flops and latches. One design goal is to
+understand how to achieve a clock frequency that satisfies the setup and hold(much harder when
+latches are involded, donno why tho?) requirements.
+Mantra #1 : one clock one edge flip flops only - prevents unecessary headaches. if multiple clocks
+better make them powers of two.
+Mantra #2 : design b4 coding
+Mantra #3 : Behaviour implies function
+Mantra #4 : Clearly eperate the control and data path
+
+In general signals start and end in registers every clock period. Clock speed is determined by the
+slowest path bw registers in the design, ie critical path. basically within the clock period all the
+logic must propogate through the gates comprising of the combinational part, an be thought of all
+max gate depth.
+
+synchronous clock distribution: The goal for the clock tree is for the clock to arrive at every leaf
+node at the same time. Tool is run after synthesis after PnR that inserts the clock tree. Basically
+the delay from the root of the tree and node is made same to each other.length matching, buffer
+delay matching, RC delay matching.
+
+Clock skew = when the same clock arrives slightly at different time for two points.mainly due to
+delay path variation due to PVT variations(process,voltage,temp) bw individual buffers. ie clock
+arrival time of the edge.
+Clock jitter = when the same clock does not repeat at the exaclty the periodic time at the same points.
+can be combined to called clock uncertainity.maily noise and much smaller than the skew.
+
+Timing 2.
+Timing for Flip Flop based designs
+t_setup : time b4 the clock edge d signal must changes.
+t_hold : time after the clock edge d should maintain the value.
+Generally, the t_setup is violated, the t_clock_Q time is more leading to timing issue.
+If t_hold is violated, the Q may or may not change or spike leading to logic failure.
+https://youtu.be/WcBYiz_ueJU?t=768
+
+t_setup : data must be setup so longest chain ie t_clock >= t_clock_q_min + t_max_logic_path + t_setup + t_skew
+t_hold : data must be valid and the combination part should not change data b4 it so fastest path ie
+t_hold <= t_clock_q_max + t_fastest_logic - t_skew
+
+Timing 3.
+Timing for latch based designs
+
+Timing 4.
+FO-4 parameter for parameterising the process node ie delay for a inverter with fan out of 4,
+propritary info, max n min.
+faster design using 
+1. pipeling - better throughput and performance/area , worse latency and power
+and area
+2.Logic level parallism ie make the critical path shorter by parallel combinational paths. pro - no
+inc in area.
+Note that RTL code for all three ie unoptimised, pipelined and parallel logic is different.
+
+Retiming: there may be oppurtunites to move the logic to a different stage of pipeline ie
+rebalancing the timing so that its not hogged down by one path.
+Exploiting the micro parallelism inherent to logics bw the registers is key to higher performance.
+
+Timing 5
+Sync across multiple clock domains.
+
+Clock Domain Crossing.
+
+Verilog I
+Reason for HDL is to capture the logic design intent in the RTL form ie all registers are specified,
+alloutputs are named and the non-register logic can be described at behaviour or hig lelvel rather
+than gate level. So normal flow is capture the design intent and simulate to verify functional
+correctness and synthesize it to get reasonably optimised design that meets timing. synthesis is
+basically a comibnational logic optimiser that is timing aware as in if you feed it shit you get
+shit. It cannot add/remove uneeded registers.
+
+Every variable assigned in a block starting with always@(posedge/negedge) becomes the output of an
+edge triggered flip-flop, this the the only way to build flip-flops whether or not you intended it
+or not because behaviour implies function.
+
+If-else gets mapped to mux ie bh->fn, whenever the inputs change the putput is evaluated that is the
+behaviour of any combinational logic.
+verilog has one way of capturing the flip-flop but has two ways of capturing the comibnation logic 
+1. alway@(input)
+2. assign = boolean equation with ?: n all. <- this is called continous assignment.
+
+Make sure the variables assigned inside a always@(*edge) is the output of flip-flop and some
+combinational logic is allowed id its the output that is modified. if you add more vairables, it
+will create more flip-flops.
+
+Basics is still the same:
+always@(*edge) - for flip flops
+always@(*) - comibnational logic described by its behaviour.
+assign a = ... - continous assignments; comibnational logic described by structure in a single line.
+Hard part is not the coding but the design
